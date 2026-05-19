@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persistence Control Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: linear-gradient(45deg, #00ff88, #00bbff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            margin-bottom: 40px;
+            opacity: 0.8;
+        }
+        
+        .control-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .control-btn {
+            padding: 20px 30px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .control-btn:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .control-btn:hover:before {
+            left: 100%;
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .inject-btn {
+            background: linear-gradient(135deg, #00ff88, #00bbff);
+            border: none;
+            color: #000;
+        }
+        
+        .clean-btn {
+            background: linear-gradient(135deg, #ff006e, #ff4458);
+            border: none;
+            color: #fff;
+        }
+        
+        .status-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .status-header {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: #00ff88;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .status-content {
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .success { color: #00ff88; }
+        .error { color: #ff4458; }
+        .warning { color: #ffaa00; }
+        
+        .glow {
+            text-shadow: 0 0 10px currentColor;
+        }
+        
+        .config-panel {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        
+        .config-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .config-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .config-label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .local-mode {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="glow">Persistence Control</h1>
+        <p class="subtitle">Advanced Web Interface</p>
+        
+        <div class="local-mode">
+            <strong>🔧 Local Mode Required</strong><br>
+            <small>This interface requires the local C++ server to be running on your computer.</small>
+        </div>
+        
+        <div class="config-panel">
+            <label class="config-label">Server URL (Local server must be running)</label>
+            <input type="text" id="serverUrl" class="config-input" placeholder="http://localhost:8080" value="http://localhost:8080">
+            <small style="color: rgba(255,255,255,0.6);">Start: persistence_server.exe</small>
+        </div>
+        
+        <div class="control-panel">
+            <button class="control-btn inject-btn pulse" onclick="inject()">
+                <div>🚀 Inject</div>
+                <small style="font-size: 0.7em; opacity: 0.8;">Launch Payload</small>
+            </button>
+            <button class="control-btn clean-btn" onclick="cleanTraces()">
+                <div>🧹 Clean Traces</div>
+                <small style="font-size: 0.7em; opacity: 0.8;">Terminate All</small>
+            </button>
+        </div>
+        
+        <div class="status-panel">
+            <div class="status-header">System Status</div>
+            <div id="statusContent" class="status-content">
+                Ready. Click a button to begin.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateStatus(message, type = 'info') {
+            const statusContent = document.getElementById('statusContent');
+            statusContent.innerHTML = `<span class="${type}">${message}</span>`;
+        }
+        
+        async function inject() {
+            updateStatus('🚀 Injecting payload...', 'warning');
+            
+            try {
+                const serverUrl = document.getElementById('serverUrl').value || 'http://localhost:8080';
+                
+                // Test if server is reachable
+                const testResponse = await fetch(`${serverUrl}/`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    cache: 'no-cache'
+                });
+                
+                if (!testResponse.ok) {
+                    throw new Error('Server not responding');
+                }
+                
+                const response = await fetch(`${serverUrl}/inject`, {
+                    method: 'POST',
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    updateStatus(`✅ Payload injected successfully! PID: ${result.pid}`, 'success');
+                } else {
+                    updateStatus(`❌ Injection failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                updateStatus(`❌ Error: ${error.message}. Make sure persistence_server.exe is running.`, 'error');
+            }
+        }
+        
+        async function cleanTraces() {
+            updateStatus('🧹 Cleaning traces...', 'warning');
+            
+            try {
+                const serverUrl = document.getElementById('serverUrl').value || 'http://localhost:8080';
+                
+                // Test if server is reachable
+                const testResponse = await fetch(`${serverUrl}/`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    cache: 'no-cache'
+                });
+                
+                if (!testResponse.ok) {
+                    throw new Error('Server not responding');
+                }
+                
+                const response = await fetch(`${serverUrl}/clean`, {
+                    method: 'POST',
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    updateStatus(`✅ Traces cleaned! Terminated ${result.terminated} processes.`, 'success');
+                } else {
+                    updateStatus(`❌ Cleanup failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                updateStatus(`❌ Error: ${error.message}. Make sure persistence_server.exe is running.`, 'error');
+            }
+        }
+        
+        // Test server connection on load
+        window.addEventListener('load', async () => {
+            updateStatus('🔧 Testing server connection...', 'warning');
+            
+            try {
+                const serverUrl = document.getElementById('serverUrl').value || 'http://localhost:8080';
+                const response = await fetch(`${serverUrl}/`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    cache: 'no-cache'
+                });
+                
+                if (response.ok) {
+                    updateStatus('✅ Server connected! Ready to control persistence.', 'success');
+                } else {
+                    updateStatus('❌ Server not responding. Run persistence_server.exe', 'error');
+                }
+            } catch (error) {
+                updateStatus('❌ Cannot connect to server. Make sure persistence_server.exe is running on your computer.', 'error');
+            }
+        });
+    </script>
+</body>
+</html>
